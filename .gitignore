@@ -1,0 +1,6 @@
+# Folders
+port_scanner_venv/
+__pycache__
+build
+
+# Files

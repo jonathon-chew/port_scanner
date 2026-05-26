@@ -1,0 +1,2 @@
+Adonis @ git+https://github.com/jonathon-chew/Adonis.git@f9c80557759348221541ce83eb049202f8f00451
+pyflags @ git+https://github.com/jonathon-chew/py-flags.git@318af126d17b71acdf9155adfcc1cf3dc878eeda
