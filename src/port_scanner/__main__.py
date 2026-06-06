@@ -1,6 +1,5 @@
-import socket, sys
+import socket, sys, re
 from typing import Any
-import re
 
 from pyflags.flag import Flags
 import Adonis
@@ -51,6 +50,7 @@ def cli() -> Flags:
     )
 
     flags.add(["--help", "-h"], "give me a help menu", bool)
+    flags.add(["--verbose"], "Print out everything", bool, False)
 
     flags.parse_and_resolve(sys.argv[1:])
 
@@ -82,15 +82,19 @@ def is_port_open(host: str, port: int, flag: Flags) -> dict[str, Any]:
 
 def print_port_results(ip, port, flags):
     response = is_port_open(ip, port, flag=flags)
+    print(VERBOSE)
     if response["open"]:
         Adonis.PrintInfo(f"\n[+] {ip}:{port} is open", end="\n")
+        SEEN = True
     elif "timed out" in response["reason"]:
         Adonis.PrintWarning(
-            f"\x1b[2K[!] {ip}:{port} timedout {response['reason']}", end="\r"
+            f"\x1b[2K[!] {ip}:{port} timedout {response['reason']}",
+            end="\n" if VERBOSE else "\r",
         )
     else:
         Adonis.PrintWarning(
-            f"\x1b[2K[!] {ip}:{port} is closed {response['reason']}", end="\r"
+            f"\x1b[2K[!] {ip}:{port} is closed {response['reason']}",
+            end="\n" if VERBOSE else "\r",
         )
 
 
@@ -117,6 +121,8 @@ def scan_ports(ip, flags):
 def main():
     flags = cli()
     # iterate over ports, from 1 to 1024
+
+    VERBOSE = flags.verbose
 
     if flags.help:
         print(flags.help_text_ordered())
@@ -145,6 +151,11 @@ def main():
 
         scan_ports(flags.ip, flags)
 
+    if not SEEN:
+        print(f"{Adonis.Ansi.reset}No open ports found: {flags.ip}")
+
 
 if __name__ == "__main__":
+    SEEN = False
+    VERBOSE = False
     main()
