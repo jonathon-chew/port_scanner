@@ -7,7 +7,6 @@ import Adonis
 RANGE_DEFAULT = [x for x in range(0, 80)]
 PORT_DEFAULT = [53, 80, 443]
 
-
 def is_ipAddress(input: str) -> bool:
 
     if re.match(
@@ -82,7 +81,7 @@ def is_port_open(host: str, port: int, flag: Flags) -> dict[str, Any]:
 
 def print_port_results(ip, port, flags):
     response = is_port_open(ip, port, flag=flags)
-    print(VERBOSE)
+
     if response["open"]:
         Adonis.PrintInfo(f"\n[+] {ip}:{port} is open", end="\n")
         SEEN = True
@@ -104,17 +103,15 @@ def scan_ports(ip, flags):
     default_port = flags.ports == PORT_DEFAULT
 
     # If the range isn't the deafult ports is
-    if not default_range and default_port:
-        for port in range(min(flags.range), max(flags.range) + 1):
-            print_port_results(ip, port, flags)
-
-    # Ports isn't just the default
-    elif not default_port:
-        for port in flags.ports:
-            print_port_results(ip, port, flags)
-
+    if not default_range and not default_port:
+        if flags.range:
+            for port in range(min(flags.range), max(flags.range) + 1):
+                print_port_results(ip, port, flags)
+        elif flags.ports:
+            for port in flags.ports:
+                print_port_results(ip, port, flags)
     else:
-        for port in range(min(flags.range), max(flags.range) + 1):
+        for port in PORT_DEFAULT:
             print_port_results(ip, port, flags)
 
 
@@ -128,7 +125,7 @@ def main():
         print(flags.help_text_ordered())
         exit(0)
 
-    if flags.ip is None and flags.ip_range is None:
+    if flags.ip is None and len(flags.ip_range) == 0:
         Adonis.PrintError("No ip addresses found in the input")
         print(flags.help_text_ordered())
         exit(1)
@@ -156,6 +153,5 @@ def main():
 
 
 if __name__ == "__main__":
-    SEEN = False
-    VERBOSE = False
+    SEEN, VERBOSE= False, False
     main()
